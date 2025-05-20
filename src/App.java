@@ -4,6 +4,7 @@ public class App {
         final int boardWidth = 750;
         final int boardHeight = 250; // used final keyword
 
+
         JFrame frame = new JFrame("Chrome Dinosaur");
         // frame.setVisible(true);
         frame.setSize(boardWidth, boardHeight);

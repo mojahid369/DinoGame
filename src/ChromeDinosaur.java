@@ -3,11 +3,83 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import javax.swing.*;
 
+// use abstraction class
+interface Drawable {
+    void draw(Graphics g);
+}
+
+class Block implements Drawable {
+    private int x, y, width, height;  // use encapsulation
+    private Image img;
+
+    public Block(int x, int y, int width, int height, Image img) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.img = img;
+    }
+
+    public int getX() {
+        return x;
+    }
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+    public int getHeight() {
+
+        return height; }
+
+    public Image getImg() {
+        return img;
+    }
+    public void setImg(Image img) {
+        this.img = img;
+    }
+
+    // use polymorphism
+    @Override
+    public void draw(Graphics g) {
+        g.drawImage(img, x, y, width, height, null);
+    }
+}
+
+    // Dinosaur class inherit Block class
+class Dinosaur extends Block {
+    public Dinosaur(int x, int y, int width, int height, Image img) {
+        super(x, y, width, height, img);
+    }
+
+    // use polymorphism
+    @Override
+    public void draw(Graphics g) {
+        super.draw(g);
+    }
+}
+
+   // Cactus class inherit Block class
+class Cactus extends Block {
+    public Cactus(int x, int y, int width, int height, Image img) {
+        super(x, y, width, height, img);
+    }
+}
+
 public class ChromeDinosaur extends JPanel implements ActionListener, KeyListener {
-    int boardWidth = 750;
+    int boardWidth = 720;
     int boardHeight = 250;
 
-    //images
+    // Images
     Image dinosaurImg;
     Image dinosaurDeadImg;
     Image dinosaurJumpImg;
@@ -15,48 +87,29 @@ public class ChromeDinosaur extends JPanel implements ActionListener, KeyListene
     Image cactus2Img;
     Image cactus3Img;
 
-    class Block {
-        int x;
-        int y;
-        int width;
-        int height;
-        Image img;
-
-        Block(int x, int y, int width, int height, Image img) {
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-            this.img = img;
-        }
-    }
-
-    //dinosaur
+    // Dinosaur
     int dinosaurWidth = 88;
     int dinosaurHeight = 94;
     int dinosaurX = 50;
     int dinosaurY = boardHeight - dinosaurHeight;
+    Dinosaur dinosaur;
 
-    Block dinosaur;
-
-    //cactus
+    // Cactus
     int cactus1Width = 34;
     int cactus2Width = 69;
     int cactus3Width = 102;
-
     int cactusHeight = 70;
     int cactusX = 700;
     int cactusY = boardHeight - cactusHeight;
-    ArrayList<Block> cactusArray;
+    ArrayList<Cactus> cactusArray;
 
-    //physics
-    int velocityX = -12; //cactus moving left speed
-    int velocityY = 0; //dinosaur jump speed
+    // Physics
+    int velocityX = -12;
+    int velocityY = 0;
     int gravity = 1;
 
     boolean gameOver = false;
     int score = 0;
-
     Timer gameLoop;
     Timer placeCactusTimer;
 
@@ -73,46 +126,30 @@ public class ChromeDinosaur extends JPanel implements ActionListener, KeyListene
         cactus2Img = new ImageIcon(getClass().getResource("./img/cactus2.png")).getImage();
         cactus3Img = new ImageIcon(getClass().getResource("./img/cactus3.png")).getImage();
 
-        //dinosaur
-        dinosaur = new Block(dinosaurX, dinosaurY, dinosaurWidth, dinosaurHeight, dinosaurImg);
-        //cactus
-        cactusArray = new ArrayList<Block>();
+        dinosaur = new Dinosaur(dinosaurX, dinosaurY, dinosaurWidth, dinosaurHeight, dinosaurImg);
+        cactusArray = new ArrayList<>();
 
-        //game timer
-        gameLoop = new Timer(1000/60, this); //1000/60 = 60 frames per 1000ms (1s), update
+        gameLoop = new Timer(1000 / 60, this);
         gameLoop.start();
 
-        //place cactus timer
-        placeCactusTimer = new Timer(1500, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                placeCactus();
-            }
-        });
+        placeCactusTimer = new Timer(1500, e -> placeCactus());
         placeCactusTimer.start();
     }
 
     void placeCactus() {
-        if (gameOver) {
-            return;
-        }
+        if (gameOver) return;
 
-        double placeCactusChance = Math.random(); //0 - 0.999999
-        if (placeCactusChance > .90) { //10% you get cactus3
-            Block cactus = new Block(cactusX, cactusY, cactus3Width, cactusHeight, cactus3Img);
-            cactusArray.add(cactus);
-        }
-        else if (placeCactusChance > .70) { //20% you get cactus2
-            Block cactus = new Block(cactusX, cactusY, cactus2Width, cactusHeight, cactus2Img);
-            cactusArray.add(cactus);
-        }
-        else if (placeCactusChance > .50) { //20% you get cactus1
-            Block cactus = new Block(cactusX, cactusY, cactus1Width, cactusHeight, cactus1Img);
-            cactusArray.add(cactus);
+        double chance = Math.random();
+        if (chance > 0.90) {
+            cactusArray.add(new Cactus(cactusX, cactusY, cactus3Width, cactusHeight, cactus3Img));
+        } else if (chance > 0.70) {
+            cactusArray.add(new Cactus(cactusX, cactusY, cactus2Width, cactusHeight, cactus2Img));
+        } else if (chance > 0.50) {
+            cactusArray.add(new Cactus(cactusX, cactusY, cactus1Width, cactusHeight, cactus1Img));
         }
 
         if (cactusArray.size() > 10) {
-            cactusArray.remove(0); //remove the first cactus from ArrayList
+            cactusArray.remove(0);
         }
     }
 
@@ -122,59 +159,43 @@ public class ChromeDinosaur extends JPanel implements ActionListener, KeyListene
     }
 
     public void draw(Graphics g) {
-        //dinosaur
-        g.drawImage(dinosaur.img, dinosaur.x, dinosaur.y, dinosaur.width, dinosaur.height, null);
-
-        //cactus
-        for (int i = 0; i < cactusArray.size(); i++) {
-            Block cactus = cactusArray.get(i);
-            g.drawImage(cactus.img, cactus.x, cactus.y, cactus.width, cactus.height, null);
+        dinosaur.draw(g);
+        for (Cactus cactus : cactusArray) {
+            cactus.draw(g);
         }
 
-        //score
         g.setColor(Color.black);
         g.setFont(new Font("Courier", Font.PLAIN, 32));
-        if (gameOver) {
-            g.drawString("Game Over: " + String.valueOf(score), 10, 35);
-        }
-        else {
-            g.drawString(String.valueOf(score), 10, 35);
-        }
+        g.drawString((gameOver ? "Game Over: " : "") + score, 10, 35);
     }
 
     public void move() {
-        //dinosaur
         velocityY += gravity;
-        dinosaur.y += velocityY;
+        dinosaur.setY(dinosaur.getY() + velocityY);
 
-        if (dinosaur.y > dinosaurY) { //stop the dinosaur from falling past the ground
-            dinosaur.y = dinosaurY;
+        if (dinosaur.getY() > dinosaurY) {
+            dinosaur.setY(dinosaurY);
             velocityY = 0;
-            dinosaur.img = dinosaurImg;
+            dinosaur.setImg(dinosaurImg);
         }
 
-        //cactus
-        for (int i = 0; i < cactusArray.size(); i++) {
-            Block cactus = cactusArray.get(i);
-            cactus.x += velocityX;
-
+        for (Cactus cactus : cactusArray) {
+            cactus.setX(cactus.getX() + velocityX);
             if (collision(dinosaur, cactus)) {
                 gameOver = true;
-                dinosaur.img = dinosaurDeadImg;
+                dinosaur.setImg(dinosaurDeadImg);
             }
         }
 
-        //score
         score++;
     }
 
     boolean collision(Block a, Block b) {
-        return a.x < b.x + b.width &&   //a's top left corner doesn't reach b's top right corner
-                a.x + a.width > b.x &&   //a's top right corner passes b's top left corner
-                a.y < b.y + b.height &&  //a's top left corner doesn't reach b's bottom left corner
-                a.y + a.height > b.y;    //a's bottom left corner passes b's top left corner
+        return a.getX() < b.getX() + b.getWidth() &&
+                a.getX() + a.getWidth() > b.getX() &&
+                a.getY() < b.getY() + b.getHeight() &&
+                a.getY() + a.getHeight() > b.getY();
     }
-
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -189,16 +210,13 @@ public class ChromeDinosaur extends JPanel implements ActionListener, KeyListene
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            // System.out.println("JUMP!");
-            if (dinosaur.y == dinosaurY) {
+            if (dinosaur.getY() == dinosaurY) {
                 velocityY = -17;
-                dinosaur.img = dinosaurJumpImg;
+                dinosaur.setImg(dinosaurJumpImg);
             }
-
             if (gameOver) {
-                //restart game by resetting conditions
-                dinosaur.y = dinosaurY;
-                dinosaur.img = dinosaurImg;
+                dinosaur.setY(dinosaurY);
+                dinosaur.setImg(dinosaurImg);
                 velocityY = 0;
                 cactusArray.clear();
                 score = 0;
@@ -209,9 +227,6 @@ public class ChromeDinosaur extends JPanel implements ActionListener, KeyListene
         }
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {}
-
-    @Override
-    public void keyReleased(KeyEvent e) {}
+    @Override public void keyTyped(KeyEvent e) {}
+    @Override public void keyReleased(KeyEvent e) {}
 }
